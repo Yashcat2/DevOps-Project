@@ -1,4 +1,7 @@
-const port = 4000;
+require("dotenv").config();
+
+
+const port = 5000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -12,11 +15,12 @@ const cors = require("cors");
 app.use(express.json());
 app.use(cors());
 
+const uri = process.env.MONGO_DB_URL;
+
 // database Connection with mongodb
-mongoose.connect(process.env.MONGO_URI || "mongodb+srv://Yashodha:23072@cluster0.hlwt8dd.mongodb.net/e-commerce?retryWrites=true&w=majority&appName=Cluster0", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+mongoose.connect(uri)
+  .then(() => console.log("✅ MongoDB Connected Successfully"))
+  .catch(err => console.error("❌ MongoDB Connection Error:", err));
   
 //Api creation
 
