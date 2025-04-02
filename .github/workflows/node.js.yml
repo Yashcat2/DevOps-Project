@@ -8,52 +8,66 @@ on:
 
 jobs:
   build:
-
     runs-on: self-hosted
-
     strategy:
       matrix:
         node-version: [18.x]
-
     steps:
     - uses: actions/checkout@v4
-
+    
     # Use Node.js version
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-
+        # Remove the cache option since we're handling dependencies per directory
+        # cache: 'npm'
+    
     # Install dependencies for frontend
     - name: Install dependencies (Frontend)
       working-directory: frontend
-      run: npm ci
-
+      run: |
+        if [ -f "package-lock.json" ]; then
+          npm ci
+        else
+          npm install
+        fi
+    
     # Install dependencies for backend
     - name: Install dependencies (Backend)
       working-directory: BackEnd
-      run: npm ci
-
+      run: |
+        if [ -f "package-lock.json" ]; then
+          npm ci
+        else
+          npm install
+        fi
+    
     # Install dependencies for admin
     - name: Install dependencies (Admin)
       working-directory: Admin
-      run: npm ci
-
+      run: |
+        if [ -f "package-lock.json" ]; then
+          npm ci
+        else
+          npm install
+        fi
+    
     # Build the project if necessary
     - name: Build frontend
       working-directory: frontend
       run: npm run build --if-present
-
+    
     - name: Build backend
       working-directory: BackEnd
       run: npm run build --if-present
-
+    
     - name: Build admin
       working-directory: Admin
       run: npm run build --if-present
-
+    
     # Set up environment variables if needed
-    - run: |
+    - name: Set up environment variables
+      run: |
         touch .env
         echo "${{ secrets.MONGO_DB_URL }}" > .env
