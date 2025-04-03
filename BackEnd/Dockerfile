@@ -34,7 +34,7 @@ RUN npm ci --silent
 COPY . .
 
 # Expose the port that the app runs on
-EXPOSE 4000
+EXPOSE 5000
 
 # Start the server
 CMD ["node", "index.js"]
