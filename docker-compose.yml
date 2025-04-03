@@ -1,4 +1,38 @@
-# # version: '3.8'
+# # # version: '3.8'
+
+# # services:
+# #   backend:
+# #     build: ./backend
+# #     ports:
+# #       - "4000:4000"
+# #     depends_on:
+# #       - mongo
+# #     environment:
+# #       - MONGO_URI=mongodb+srv://Yashodha:23072@cluster0.hlwt8dd.mongodb.net/e-commerce?retryWrites=true&w=majority&appName=Cluster0
+# #     volumes:
+# #       - ./backend:/app
+# #     restart: unless-stopped
+
+# #   frontend:
+# #     build: ./frontend
+# #     ports:
+# #       - "3000:80"
+# #     depends_on:
+# #       - backend
+# #     restart: unless-stopped
+
+# #   mongo:
+# #     image: mongo:latest
+# #     container_name: mongo_container
+# #     ports:
+# #       - "27017:27017"
+# #     volumes:
+# #       - mongo-data:/data/db
+# #     restart: unless-stopped
+
+# # volumes:
+# #   mongo-data:
+# version: '3.8'
 
 # services:
 #   backend:
@@ -9,9 +43,13 @@
 #       - mongo
 #     environment:
 #       - MONGO_URI=mongodb+srv://Yashodha:23072@cluster0.hlwt8dd.mongodb.net/e-commerce?retryWrites=true&w=majority&appName=Cluster0
+#       # Consider using secrets or environment variables for sensitive information
 #     volumes:
 #       - ./backend:/app
+#       - /app/node_modules
 #     restart: unless-stopped
+#     networks:
+#       - app-network
 
 #   frontend:
 #     build: ./frontend
@@ -20,6 +58,23 @@
 #     depends_on:
 #       - backend
 #     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   admin:
+#     build: ./Admin
+#     ports:
+#       - "5173:5173"
+#     depends_on:
+#       - backend
+#     environment:
+#       - VITE_API_URL=http://backend:4000/api
+#     volumes:
+#       - ./Admin:/app
+#       - /app/node_modules
+#     restart: unless-stopped
+#     networks:
+#       - app-network
 
 #   mongo:
 #     image: mongo:latest
@@ -29,37 +84,37 @@
 #     volumes:
 #       - mongo-data:/data/db
 #     restart: unless-stopped
+#     networks:
+#       - app-network
 
 # volumes:
 #   mongo-data:
-version: '3.8'
+
+# networks:
+#   app-network:
+#     driver: bridge
+
+version: '3'
 
 services:
-  backend:
-    build: ./backend
-    ports:
-      - "4000:4000"
-    depends_on:
-      - mongo
-    environment:
-      - MONGO_URI=mongodb+srv://Yashodha:23072@cluster0.hlwt8dd.mongodb.net/e-commerce?retryWrites=true&w=majority&appName=Cluster0
-      # Consider using secrets or environment variables for sensitive information
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    restart: unless-stopped
-    networks:
-      - app-network
-
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - backend
-    restart: unless-stopped
-    networks:
-      - app-network
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+
+  backend:
+    build: ./BackEnd
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_DB_URL=${MONGO_DB_URL}
+    volumes:
+      - ./BackEnd:/app
+      - /app/node_modules
 
   admin:
     build: ./Admin
@@ -68,28 +123,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://backend:4000/api
+      - VITE_API_URL=http://localhost:5000/api
     volumes:
       - ./Admin:/app
       - /app/node_modules
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  mongo:
-    image: mongo:latest
-    container_name: mongo_container
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    restart: unless-stopped
-    networks:
-      - app-network
-
-volumes:
-  mongo-data:
-
-networks:
-  app-network:
-    driver: bridge
