@@ -4,46 +4,22 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                // Checkout your repository containing docker-compose.yml
+               checkout scm
             }
         }
         
-        stage('Build Docker Images') {
-            steps {
-                sh 'docker-compose build'
+        stage('Deploy with Docker Compose') {
+    steps {
+        script {
+            def result = sh(script: 'docker-compose up -d', returnStatus: true)
+            if (result != 0) {
+                error("Docker Compose failed with exit code ${result}")
             }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                sh 'echo "Running tests..."'
-                // Add actual test commands for each component
-                // sh 'cd frontend && npm test'
-                // sh 'cd backend && npm test'
-                // sh 'cd admin && npm test'
-            }
-        }
-        
-        stage('Deploy') {
-            steps {
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d'
-            }
-        }
-        
-        stage('Cleanup') {
-            steps {
-                sh 'docker system prune -af --volumes'
-            }
-        }
-    }
-    
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
+
+        }
+    }
+
