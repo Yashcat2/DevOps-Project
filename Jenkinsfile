@@ -112,6 +112,7 @@ pipeline {
                 script {
                     sh '''
                     cd BackEnd
+                    ls
                     docker build -t $DOCKER_IMAGE_BACKEND .
                     '''
                 }
@@ -122,7 +123,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    cd FrontEnd
+                    cd frontend
                     docker build -t $DOCKER_IMAGE_FRONTEND .
                     '''
                 }
