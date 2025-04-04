@@ -1,25 +1,46 @@
 pipeline {
     agent any
-    
+
+     environment {
+        DOCKER_IMAGE = "chamaravishwajith644/spring-boot-app:latest"
+        DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
+        SSH_CREDENTIALS_ID = "homemate-dev-server"
+        SSH_TARGET = "ubuntu@16.170.174.241"
+        DOCKER_CONTAINER = "spring-boot-app"
+        REACT_APP_IMAGE = "chamaravishwajith644/react-frontend:latest"
+        TERRAFORM_USER = "Terraform-User-Jenkins"
+    }
+
+
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                // Checkout your repository containing docker-compose.yml
-               checkout scm
+                git branch: 'main', url: 'https://github.com/Yashcat2/DevOps-Project.git'
             }
         }
         
-        stage('Deploy with Docker Compose') {
-    steps {
-        script {
-            def result = sh(script: 'docker-compose up -d', returnStatus: true)
-            if (result != 0) {
-                error("Docker Compose failed with exit code ${result}")
+        stage('Build') {
+            steps {
+                echo 'Building the application...'
+                // Example build command
+                sh 'npm install'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                sh 'npm test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the application...'
+                // Example deployment command
+                sh 'docker build -t my-app .'
+                sh 'docker run -d -p 3000:3000 my-app'
             }
         }
     }
 }
-
-        }
-    }
-
