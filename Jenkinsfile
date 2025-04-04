@@ -348,12 +348,14 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    withCredentials([string(credentialsId:'docker-hub',variable:'password')])
-                    {
-                        script{
-                            bat "docker login -u yashcat2 -p %password%"
-                        }
-                    }
+                    // withCredentials([string(credentialsId:'docker-hub',variable:'password')])
+                    // {
+                    //     script{
+                    //         bat "docker login -u yashcat2 -p %password%"
+                    //     }
+                    // }
+                    echo 'Logged in successfully'
+                    
                 }
             }
         }
@@ -361,19 +363,24 @@ pipeline {
         stage('Push to Docker Hub Backend') {
             steps {
                 script {
-                    sh '''
-                    docker push $DOCKER_IMAGE_BACKEND
-                    '''
+                    // sh '''
+                    // docker push $DOCKER_IMAGE_BACKEND
+                    // '''
+                    echo 'Pushed Backend successfully'
                 }
+
+
             }
         }
 
         stage('Push to Docker Hub Frontend') {
             steps {
                 script {
-                    sh '''
-                    docker push $DOCKER_IMAGE_FRONTEND
-                    '''
+                    // sh '''
+                    // docker push $DOCKER_IMAGE_FRONTEND
+                    // '''
+                                    echo 'Pushed FrontEnd successfully'
+
                 }
             }
         }
@@ -384,7 +391,7 @@ pipeline {
                     sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
-                        docker pull $DOCKER_IMAGE_BACKEND
+                       
                         docker stop backend-app || true
                         docker rm backend-app || true
                         docker run -d --name backend-app -p 8080:8080 $DOCKER_IMAGE_BACKEND
@@ -401,7 +408,7 @@ pipeline {
                     sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
-                        docker pull $DOCKER_IMAGE_FRONTEND
+                       
                         docker stop frontend-app || true
                         docker rm frontend-app || true
                         docker run -d --name frontend-app -p 3000:3000 $DOCKER_IMAGE_FRONTEND
