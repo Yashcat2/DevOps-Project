@@ -1,16 +1,13 @@
 pipeline {
     agent any
 
-     environment {
-        DOCKER_IMAGE = "chamaravishwajith644/spring-boot-app:latest"
-        DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
+    environment {
+        DOCKER_IMAGE = "yashcat2/backend-app:latest"
+        DOCKER_CREDENTIALS_ID = "DockerHub"
         SSH_CREDENTIALS_ID = "homemate-dev-server"
-        SSH_TARGET = "ubuntu@16.170.174.241"
-        DOCKER_CONTAINER = "spring-boot-app"
-        REACT_APP_IMAGE = "chamaravishwajith644/react-frontend:latest"
-        TERRAFORM_USER = "Terraform-User-Jenkins"
+        SSH_TARGET = "ubuntu@51.20.183.95"
+        REACT_APP_IMAGE = "yashcat2/react-frontend:latest"
     }
-
 
     stages {
         stage('Clone Repository') {
@@ -19,28 +16,61 @@ pipeline {
             }
         }
         
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building the application...'
-                // Example build command
-                sh 'npm install'
+                script {
+                    sh '''
+                    cd BackEnd
+                    docker build -t $DOCKER_IMAGE .
+                    '''
+                }
             }
         }
         
-        stage('Test') {
+        stage('Login to Docker Hub') {
             steps {
-                echo 'Running tests...'
-                sh 'npm test'
+                script {
+                    withCredentials([usernamePassword(credentialsId: "$DOCKER_CREDENTIALS_ID", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
+                }
             }
         }
 
-        stage('Deploy') {
+        stage('Push to Docker Hub') {
             steps {
-                echo 'Deploying the application...'
-                // Example deployment command
-                sh 'docker build -t my-app .'
-                sh 'docker run -d -p 3000:3000 my-app'
+                script {
+                    sh '''
+                    docker push $DOCKER_IMAGE
+                    '''
+                }
             }
+        }
+
+        stage('Deploy to Server') {
+            steps {
+                script {
+                    sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
+                        sh '''
+                        ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
+                        docker pull $DOCKER_IMAGE
+                        docker stop backend-app || true
+                        docker rm backend-app || true
+                        docker run -d --name backend-app -p 8080:8080 $DOCKER_IMAGE
+                        EOF
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up Docker images'
+            sh 'docker system prune -f'
         }
     }
 }
