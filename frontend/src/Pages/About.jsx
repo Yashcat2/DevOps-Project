@@ -22,7 +22,7 @@ const About = () => {
                 <p>Looking ahead, I am excited about the potential to contribute to advancements in technology and to develop solutions that have a meaningful impact on society. I am eager to gain hands-on experience through internships and research opportunities, and to connect with professionals in the field to further my growth and career aspirations.</p>
                 <a href="https://www.linkedin.com/in/yashodha-gunawardhana-217082219/"><img src={lnkdn} alt=""  />    </a>                
                 <a href="mailto:ikykgunawardhana@gmail.com"><img src={mail} alt="" /></a>
-                <a href=" "><img src={x} alt="" /></a>
+                {/* <a href=" "><img src={x} alt="" /></a> */}
 
                 
                 
