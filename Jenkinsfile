@@ -387,34 +387,49 @@ pipeline {
 
         stage('Deploy to Server Backend') {
             steps {
-                script {
-                    sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
-                        sh '''
-                        ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
+                // script {
+                //     sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
+                //         sh '''
+                //         ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
                        
-                        docker stop backend-app || true
-                        docker rm backend-app || true
-                        docker run -d --name backend-app -p 8080:8080 $DOCKER_IMAGE_BACKEND
-                        EOF
-                        '''
-                    }
+                //         docker stop backend-app || true
+                //         docker rm backend-app || true
+                //         docker run -d --name backend-app -p 8080:8080 $DOCKER_IMAGE_BACKEND
+                //         EOF
+                //         '''
+                //     }
+                 script {
+                    sh '''
+                    docker stop backend-app || true
+                    docker rm backend-app || true
+                    docker run -d --name backend-app -p 4000:4000 $DOCKER_IMAGE_BACKEND
+                    '''
+                }
+
                 }
             }
-        }
+        
 
         stage('Deploy to Server Frontend') {
             steps {
-                script {
-                    sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
-                        sh '''
-                        ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
+                // script {
+                //     sshagent(credentials: ["$SSH_CREDENTIALS_ID"]) {
+                //         sh '''
+                //         ssh -o StrictHostKeyChecking=no $SSH_TARGET << 'EOF'
                        
-                        docker stop frontend-app || true
-                        docker rm frontend-app || true
-                        docker run -d --name frontend-app -p 3000:3000 $DOCKER_IMAGE_FRONTEND
-                        EOF
-                        '''
-                    }
+                //         docker stop frontend-app || true
+                //         docker rm frontend-app || true
+                //         docker run -d --name frontend-app -p 3000:3000 $DOCKER_IMAGE_FRONTEND
+                //         EOF
+                //         '''
+                //     }
+                // }
+                script {
+                    sh '''
+                    docker stop frontend-app || true
+                    docker rm frontend-app || true
+                    docker run -d --name frontend-app -p 3000:80 $DOCKER_IMAGE_FRONTEND
+                    '''
                 }
             }
         }
@@ -426,4 +441,5 @@ pipeline {
             sh 'docker system prune -f'
         }
     }
+
 }
