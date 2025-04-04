@@ -95,7 +95,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_BACKEND = "yashcat2/backend-app:latest"
         DOCKER_IMAGE_FRONTEND = "yashcat2/react-frontend:latest"
-        DOCKER_CREDENTIALS_ID = "DockerHub"
+        DOCKER_CREDENTIALS_ID = "docker-hub"
         SSH_CREDENTIALS_ID = "homemate-dev-server"
         SSH_TARGET = "ubuntu@51.20.183.95"
     }
@@ -133,10 +133,11 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: "$DOCKER_CREDENTIALS_ID", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        '''
+                    withCredentials([string(credentialsId:'docker-hub',variable:'password')])
+                    {
+                        script{
+                            bat "docker login -u yashcat2 -p %password%"
+                        }
                     }
                 }
             }
