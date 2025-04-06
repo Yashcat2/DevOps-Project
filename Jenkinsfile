@@ -348,13 +348,13 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    // withCredentials([string(credentialsId:'docker-hub',variable:'password')])
-                    // {
-                    //     script{
-                    //         bat "docker login -u yashcat2 -p %password%"
-                    //     }
-                    // }
-                    echo 'Logged in successfully'
+                    withCredentials([string(credentialsId:'docker-hub',variable:'password')])
+                    {
+                        script{
+                            bat "docker login -u yashcat2 -p %password%"
+                        }
+                    }
+                    // echo 'Logged in successfully'
                     
                 }
             }
@@ -363,10 +363,10 @@ pipeline {
         stage('Push to Docker Hub Backend') {
             steps {
                 script {
-                    // sh '''
-                    // docker push $DOCKER_IMAGE_BACKEND
-                    // '''
-                    echo 'Pushed Backend successfully'
+                    sh '''
+                    docker push $DOCKER_IMAGE_BACKEND
+                    '''
+                    // echo 'Pushed Backend successfully'
                 }
 
 
@@ -376,10 +376,10 @@ pipeline {
         stage('Push to Docker Hub Frontend') {
             steps {
                 script {
-                    // sh '''
-                    // docker push $DOCKER_IMAGE_FRONTEND
-                    // '''
-                                    echo 'Pushed FrontEnd successfully'
+                    sh '''
+                    docker push $DOCKER_IMAGE_FRONTEND
+                    '''
+                                    // echo 'Pushed FrontEnd successfully'
 
                 }
             }
@@ -402,7 +402,7 @@ pipeline {
                     sh '''
                     docker stop backend-app || true
                     docker rm backend-app || true
-                    docker run -d --name backend-app -p 4000:4000 $DOCKER_IMAGE_BACKEND
+                    docker run -d --name backend-app -p 5000:5000 $DOCKER_IMAGE_BACKEND
                     '''
                 }
 
