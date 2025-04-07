@@ -13,7 +13,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Yashcat2/DevOps-Project.git'
             }
         }
-        
+                
         stage('Build Docker Image Backend') {
             steps {
                 script {
@@ -25,7 +25,7 @@ pipeline {
                 }
             }
         }
-        
+                
         stage('Build Docker Image Frontend') {
             steps {
                 script {
@@ -36,7 +36,7 @@ pipeline {
                 }
             }
         }
-        
+                
         stage('Login to Docker Hub') {
             steps {
                 script {
@@ -48,7 +48,7 @@ pipeline {
                 }
             }
         }
-        
+                
         stage('Push to Docker Hub Backend') {
             steps {
                 script {
@@ -58,7 +58,7 @@ pipeline {
                 }
             }
         }
-        
+                
         stage('Push to Docker Hub Frontend') {
             steps {
                 script {
@@ -68,36 +68,57 @@ pipeline {
                 }
             }
         }
-        
+                
         stage('Deploy to Server Backend') {
             steps {
                 script {
                     sh '''
                     docker stop backend-app || true
                     docker rm backend-app || true
-                    docker run -d --name backend-app -p 5000:5000 $DOCKER_IMAGE_BACKEND
+                    docker run -d --name backend-app -p 5000:5000 --restart unless-stopped $DOCKER_IMAGE_BACKEND
+                    # Verify container is running
+                    docker ps | grep backend-app
                     '''
                 }
             }
         }
-        
+                
         stage('Deploy to Server Frontend') {
             steps {
                 script {
                     sh '''
                     docker stop frontend-app || true
                     docker rm frontend-app || true
-                    docker run -d --name frontend-app -p 3000:80 $DOCKER_IMAGE_FRONTEND
+                    docker run -d --name frontend-app -p 3000:80 --restart unless-stopped $DOCKER_IMAGE_FRONTEND
+                    # Verify container is running
+                    docker ps | grep frontend-app
+                    # Check logs for any immediate errors
+                    sleep 3
+                    docker logs frontend-app
+                    '''
+                }
+            }
+        }
+        
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    sh '''
+                    echo "Verifying both containers are running..."
+                    docker ps
                     '''
                 }
             }
         }
     }
-    
+        
     post {
         always {
-            echo 'Cleaning up Docker images'
-            sh 'docker system prune -f'
+            echo 'Cleaning up unused Docker images'
+            sh '''
+            # Don't remove running containers, only dangling images
+            docker image prune -f
+            '''
         }
     }
 }
