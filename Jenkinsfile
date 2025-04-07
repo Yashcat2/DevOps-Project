@@ -75,7 +75,7 @@ pipeline {
                     sh '''
                     docker stop backend-app || true
                     docker rm backend-app || true
-                    docker run -d --name backend-app -p 5000:5000 --restart unless-stopped $DOCKER_IMAGE_BACKEND
+                    docker run -d --name backend-app -p 4000:4000 --restart unless-stopped $DOCKER_IMAGE_BACKEND
                     # Verify container is running
                     docker ps | grep backend-app
                     '''
